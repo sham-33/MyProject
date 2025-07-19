@@ -24,7 +24,7 @@ A comprehensive hospital management system built with the MERN stack, featuring 
 - Input validation and sanitization
 - Rate limiting and CORS protection
 
-## Quick Start
+<!-- ## Quick Start
 
 1. Install dependencies:
    ```bash
@@ -45,4 +45,4 @@ A comprehensive hospital management system built with the MERN stack, featuring 
 
 ## License
 
-ISC License
+ISC License -->
