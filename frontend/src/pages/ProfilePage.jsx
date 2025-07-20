@@ -317,7 +317,7 @@ const ProfilePage = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Hospital/Clinic</label>
-                        <p className="text-gray-900">{user.hospital?.name}</p>
+                        <p className="text-gray-900">{user.hospital}</p>
                       </div>
                     </div>
 

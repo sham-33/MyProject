@@ -97,16 +97,15 @@ const doctorSchema = new mongoose.Schema({
     }
   }],
   hospital: {
-    name: {
-      type: String,
-      required: [true, 'Please provide hospital/clinic name']
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String
-    }
+    type: String,
+    required: [true, 'Please provide hospital/clinic name'],
+    trim: true
+  },
+  hospitalAddress: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String
   },
   consultationFee: {
     type: Number,

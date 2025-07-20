@@ -50,6 +50,7 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = user;
+    req.user.userType = decoded.userType;
     req.userType = decoded.userType;
     next();
   } catch (error) {
@@ -110,6 +111,7 @@ exports.protectPatient = async (req, res, next) => {
     }
 
     req.user = patient;
+    req.user.userType = 'patient';
     req.userType = 'patient';
     next();
   } catch (error) {
@@ -157,6 +159,7 @@ exports.protectDoctor = async (req, res, next) => {
     }
 
     req.user = doctor;
+    req.user.userType = 'doctor';
     req.userType = 'doctor';
     next();
   } catch (error) {

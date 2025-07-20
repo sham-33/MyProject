@@ -1,13 +1,28 @@
-# Hospital Management System - MERN Stack
+# Hospital Management System - Patient-Doctor Appointment Booking
 
-A comprehensive hospital management system built with the MERN stack, featuring separate authentication and management for both patients and doctors.
+A comprehensive healthcare platform that allows patients to explore doctors, book appointments, and manage communication with healthcare providers.
 
 ## Features
 
-### For Patients
-- Registration and authentication with JWT
-- Profile management with medical history
-- Emergency contacts and address management
+### For Patients:
+- **Find Doctors**: Search and filter doctors by specialization, fees, and availability
+- **Book Appointments**: Schedule appointments with available time slots
+- **Appointment Management**: View, manage, and cancel appointments
+- **Messaging**: Communicate with doctors and receive appointment responses
+- **Profile Management**: Manage personal health information
+
+### For Doctors:
+- **Appointment Management**: View, accept, or reject appointment requests
+- **Patient Communication**: Receive booking requests and communicate with patients
+- **Schedule Management**: Set availability and manage time slots
+- **Profile Management**: Update professional information and specializations
+
+### System Features:
+- **Real-time Messaging**: Appointment requests automatically create messages for doctors
+- **Status Tracking**: Track appointment status (pending, confirmed, rejected, cancelled)
+- **Email Notifications**: Automatic email notifications for appointment updates
+- **Secure Authentication**: JWT-based authentication for both patients and doctors
+- **Responsive Design**: Mobile-friendly interface
 - Password reset via email
 - Responsive patient dashboard
 

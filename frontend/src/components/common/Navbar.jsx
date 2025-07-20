@@ -7,7 +7,10 @@ import {
   Stethoscope, 
   UserPlus,
   Menu,
-  X
+  X,
+  Calendar,
+  Search,
+  Mail
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -81,12 +84,39 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
+                {userType === 'patient' && (
+                  <Link
+                    to="/doctors"
+                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>Find Doctors</span>
+                  </Link>
+                )}
+                
+                <Link
+                  to="/appointments"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Appointments</span>
+                </Link>
+                
+                <Link
+                  to="/messages"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span>Messages</span>
+                </Link>
+                
                 <Link
                   to="/profile"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Profile
                 </Link>
+                
                 <div className="flex items-center space-x-2">
                   <div className={`h-2 w-2 rounded-full ${userType === 'patient' ? 'bg-blue-600' : 'bg-green-600'}`}></div>
                   <span className="text-gray-700 font-medium">
@@ -179,6 +209,36 @@ const Navbar = () => {
                       {userType}
                     </div>
                   </div>
+                  
+                  {userType === 'patient' && (
+                    <Link
+                      to="/doctors"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium"
+                      onClick={toggleMenu}
+                    >
+                      <Search className="h-4 w-4" />
+                      <span>Find Doctors</span>
+                    </Link>
+                  )}
+                  
+                  <Link
+                    to="/appointments"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium"
+                    onClick={toggleMenu}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>Appointments</span>
+                  </Link>
+                  
+                  <Link
+                    to="/messages"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium"
+                    onClick={toggleMenu}
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span>Messages</span>
+                  </Link>
+                  
                   <Link
                     to="/profile"
                     className="block text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium"
@@ -186,6 +246,7 @@ const Navbar = () => {
                   >
                     Profile
                   </Link>
+                  
                   <button
                     onClick={() => {
                       handleLogout();

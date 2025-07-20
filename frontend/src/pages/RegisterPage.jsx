@@ -81,7 +81,7 @@ const doctorSchema = yup.object({
     .number()
     .min(0, "Experience cannot be negative")
     .required("Experience is required"),
-  "hospital.name": yup.string().required("Hospital/clinic name is required"),
+  "hospital": yup.string().required("Hospital/clinic name is required"),
   consultationFee: yup
     .number()
     .min(0, "Fee cannot be negative")
@@ -674,17 +674,17 @@ const RegisterPage = () => {
                         Hospital/Clinic Name
                       </label>
                       <input
-                        {...register("hospital.name")}
+                        {...register("hospital")}
                         type="text"
                         className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-                          errors.hospital?.name
+                          errors.hospital
                             ? "border-red-300"
                             : "border-gray-300"
                         }`}
                       />
-                      {errors.hospital?.name && (
+                      {errors.hospital && (
                         <p className="mt-1 text-sm text-red-600">
-                          {errors.hospital.name.message}
+                          {errors.hospital.message}
                         </p>
                       )}
                     </div>

@@ -7,6 +7,9 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import ExploreDoctorsPage from './pages/ExploreDoctorsPage';
+import AppointmentsPage from './pages/AppointmentsPage';
+import MessagesPage from './pages/MessagesPage';
 
 function App() {
   return (
@@ -29,6 +32,33 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/doctors"
+                element={
+                  <ProtectedRoute requiredUserType="patient">
+                    <ExploreDoctorsPage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/appointments"
+                element={
+                  <ProtectedRoute>
+                    <AppointmentsPage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/messages"
+                element={
+                  <ProtectedRoute>
+                    <MessagesPage />
                   </ProtectedRoute>
                 }
               />
