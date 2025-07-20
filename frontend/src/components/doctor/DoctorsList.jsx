@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Star, Clock, MapPin, DollarSign } from 'lucide-react';
+import { Search, Filter, Star, Clock, MapPin, DollarSign, Stethoscope, Award, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -77,31 +77,39 @@ const DoctorsList = ({ onSelectDoctor }) => {
   if (loading && currentPage === 1) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Finding the best doctors for you...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Search and Filters */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="bg-white/70 backdrop-blur-lg p-8 rounded-3xl shadow-xl border border-white/20">
+        <div className="flex items-center space-x-3 mb-6">
+          <Filter className="h-6 w-6 text-blue-600" />
+          <h3 className="text-xl font-bold text-gray-900">Find Your Perfect Doctor</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               type="text"
               placeholder="Search doctors..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-2xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
 
           <select
             value={filters.specialization}
             onChange={(e) => handleFilterChange('specialization', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           >
             <option value="">All Specializations</option>
             {specializations.map(spec => (
@@ -117,14 +125,14 @@ const DoctorsList = ({ onSelectDoctor }) => {
               placeholder="Min Fee"
               value={filters.minFee}
               onChange={(e) => handleFilterChange('minFee', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
             <input
               type="number"
               placeholder="Max Fee"
               value={filters.maxFee}
               onChange={(e) => handleFilterChange('maxFee', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
 
@@ -184,64 +192,73 @@ const DoctorsList = ({ onSelectDoctor }) => {
 
 const DoctorCard = ({ doctor, onSelectDoctor }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Dr. {doctor.firstName} {doctor.lastName}
-            </h3>
-            <p className="text-sm text-blue-600 font-medium">
-              {formatSpecialization(doctor.specialization)}
-            </p>
+    <div className="bg-white/70 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300 card-hover">
+      <div className="p-8">
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-xl font-bold">
+              {doctor.firstName?.charAt(0)}{doctor.lastName?.charAt(0)}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Dr. {doctor.firstName} {doctor.lastName}
+              </h3>
+              <p className="text-sm font-semibold text-blue-600">
+                {formatSpecialization(doctor.specialization)}
+              </p>
+            </div>
           </div>
           {doctor.isVerified && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              Verified
-            </span>
+            <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-green-100 text-green-800">
+              <Award className="h-4 w-4" />
+              <span className="text-xs font-medium">Verified</span>
+            </div>
           )}
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <MapPin className="h-4 w-4 mr-2" />
-            <span>{doctor.hospital}</span>
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center text-sm text-gray-700">
+            <MapPin className="h-4 w-4 mr-3 text-gray-400" />
+            <span className="font-medium">{doctor.hospital}</span>
           </div>
           
-          <div className="flex items-center text-sm text-gray-600">
-            <DollarSign className="h-4 w-4 mr-2" />
-            <span>₹{doctor.consultationFee} consultation fee</span>
+          <div className="flex items-center text-sm text-gray-700">
+            <DollarSign className="h-4 w-4 mr-3 text-gray-400" />
+            <span className="font-medium">₹{doctor.consultationFee} consultation</span>
           </div>
           
-          <div className="flex items-center text-sm text-gray-600">
-            <Clock className="h-4 w-4 mr-2" />
-            <span>{doctor.experience} years experience</span>
+          <div className="flex items-center text-sm text-gray-700">
+            <Clock className="h-4 w-4 mr-3 text-gray-400" />
+            <span className="font-medium">{doctor.experience} years experience</span>
           </div>
         </div>
 
         {doctor.biography && (
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          <p className="text-sm text-gray-600 mb-6 line-clamp-2 leading-relaxed">
             {doctor.biography}
           </p>
         )}
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-gray-300" />
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${star <= 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                />
+              ))}
             </div>
-            <span className="text-sm text-gray-600 ml-2">4.0</span>
+            <span className="text-sm font-medium text-gray-700">4.0</span>
+            <span className="text-xs text-gray-500">(25+ reviews)</span>
           </div>
           
           <button
             onClick={() => onSelectDoctor(doctor)}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="btn-primary text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2"
           >
-            Book Appointment
+            <span>Book Now</span>
+            <Users className="h-4 w-4" />
           </button>
         </div>
       </div>

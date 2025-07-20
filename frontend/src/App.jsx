@@ -10,12 +10,14 @@ import ProfilePage from './pages/ProfilePage';
 import ExploreDoctorsPage from './pages/ExploreDoctorsPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
           <Navbar />
           <main>
             <Routes>
@@ -25,6 +27,8 @@ function App() {
               <Route path="/login/:userType" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/register/:userType" element={<RegisterPage />} />
+              <Route path="/forgot-password/:userType" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password/:userType/:token" element={<ResetPasswordPage />} />
               
               {/* Protected routes */}
               <Route
@@ -74,19 +78,24 @@ function App() {
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#363636',
-                color: '#fff',
+                background: 'white',
+                color: '#1f2937',
+                border: '1px solid #e5e7eb',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+                fontWeight: '500',
               },
               success: {
-                duration: 3000,
-                style: {
-                  background: '#10B981',
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: 'white',
                 },
               },
               error: {
-                duration: 5000,
-                style: {
-                  background: '#EF4444',
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: 'white',
                 },
               },
             }}

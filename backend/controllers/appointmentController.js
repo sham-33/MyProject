@@ -399,7 +399,7 @@ exports.getDoctorAvailability = async (req, res, next) => {
     }
 
     const appointmentDate = new Date(date);
-    const dayName = appointmentDate.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayName = appointmentDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
     // Find doctor's availability for the day
     const dayAvailability = doctor.availability.find(av => av.day === dayName);
