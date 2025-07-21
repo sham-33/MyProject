@@ -79,7 +79,7 @@ exports.login = async (req, res, next) => {
     if (!patient) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'No account found with this email address. Please check your email or register for a new account.'
       });
     }
 
@@ -89,7 +89,7 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Incorrect password. Please check your password and try again.'
       });
     }
 
@@ -102,7 +102,7 @@ exports.login = async (req, res, next) => {
 
     sendTokenResponse(patient, 200, res, 'patient');
   } catch (error) {
-    console.error(error);
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error during login'

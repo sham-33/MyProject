@@ -158,12 +158,20 @@ export const AuthProvider = ({ children }) => {
 
         toast.success(`Welcome back, ${user.firstName}!`);
         return { success: true };
+      } else {
+        // Handle case where response is received but success is false
+        const message = response.data?.message || 'Login failed';
+        dispatch({ type: actionTypes.SET_ERROR, payload: message });
+        // Don't show toast here - let component handle the error display
+        return { success: false, message };
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
       dispatch({ type: actionTypes.SET_ERROR, payload: message });
-      toast.error(message);
+      // Don't show toast here - let component handle the error display
       return { success: false, message };
+    } finally {
+      dispatch({ type: actionTypes.SET_LOADING, payload: false });
     }
   };
 

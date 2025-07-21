@@ -229,6 +229,26 @@ const AppointmentsPage = () => {
 const AppointmentCard = ({ appointment, userType, onViewDetails, onCancel }) => {
   const otherParty = userType === 'patient' ? appointment.doctor : appointment.patient;
   
+  // Handle case where doctor/patient data might be null
+  if (!otherParty) {
+    return (
+      <div className="bg-red-50 rounded-lg shadow-sm border border-red-200 hover:shadow-md transition-shadow duration-200">
+        <div className="p-6">
+          <div className="text-red-600">
+            <h3 className="text-lg font-semibold">Invalid Appointment Data</h3>
+            <p className="text-sm">
+              {userType === 'patient' 
+                ? 'Doctor information is missing for this appointment.'
+                : 'Patient information is missing for this appointment.'
+              }
+            </p>
+            <p className="text-xs mt-2">Appointment ID: {appointment._id}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
       <div className="p-6">
@@ -247,9 +267,9 @@ const AppointmentCard = ({ appointment, userType, onViewDetails, onCancel }) => 
               </span>
             </div>
             
-            {userType === 'patient' && appointment.doctor.specialization && (
+            {userType === 'patient' && otherParty.specialization && (
               <p className="text-sm text-blue-600 font-medium capitalize mb-2">
-                {appointment.doctor.specialization.replace('_', ' ')}
+                {otherParty.specialization.replace('_', ' ')}
               </p>
             )}
           </div>
@@ -277,10 +297,10 @@ const AppointmentCard = ({ appointment, userType, onViewDetails, onCancel }) => 
           <p className="text-sm text-gray-900">{appointment.reason}</p>
         </div>
 
-        {userType === 'patient' && appointment.doctor.hospital && (
+        {userType === 'patient' && otherParty.hospital && (
           <div className="flex items-center text-sm text-gray-600 mb-4">
             <MapPin className="h-4 w-4 mr-2" />
-            <span>{appointment.doctor.hospital}</span>
+            <span>{otherParty.hospital}</span>
           </div>
         )}
 
@@ -333,6 +353,33 @@ const AppointmentDetailModal = ({ appointment, userType, onClose, onCancel }) =>
   };
 
   const otherParty = userType === 'patient' ? appointment.doctor : appointment.patient;
+
+  // Handle case where doctor/patient data might be null
+  if (!otherParty) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg max-w-2xl w-full">
+          <div className="p-6">
+            <div className="text-red-600 text-center">
+              <h2 className="text-xl font-semibold mb-4">Invalid Appointment Data</h2>
+              <p className="mb-4">
+                {userType === 'patient' 
+                  ? 'Doctor information is missing for this appointment.'
+                  : 'Patient information is missing for this appointment.'
+                }
+              </p>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

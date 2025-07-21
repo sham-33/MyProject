@@ -18,6 +18,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState(userType || 'patient');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const {
     register,
@@ -35,9 +36,31 @@ const LoginPage = () => {
   }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data) => {
-    const result = await login(data, selectedUserType);
-    if (result.success) {
-      navigate('/profile');
+    // Clear previous field errors
+    setFieldErrors({});
+    
+    try {
+      const result = await login(data, selectedUserType);
+      
+      if (result && result.success) {
+        navigate('/profile');
+      } else {
+        const errorMessage = result?.message || 'Login failed';
+        
+        // Prevent form reset on error by not throwing
+        // Set field-specific errors based on the error message
+        if (errorMessage.toLowerCase().includes('password')) {
+          setFieldErrors({ password: errorMessage });
+        } else if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('account')) {
+          setFieldErrors({ email: errorMessage });
+        } else {
+          // Generic error - show under password field as default
+          setFieldErrors({ password: errorMessage });
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setFieldErrors({ password: 'An error occurred during login' });
     }
   };
 
@@ -140,17 +163,25 @@ const LoginPage = () => {
                   type="email"
                   {...register('email')}
                   className={`appearance-none block w-full pl-12 pr-3 py-3 border rounded-2xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white/50'
+                    errors.email || fieldErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white/50'
                   }`}
                   placeholder="Enter your email address"
                 />
-                {errors.email && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
-                    <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
+              {/* Show form validation error */}
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+                  {errors.email.message}
+                </p>
+              )}
+              {/* Show field-specific error from login attempt */}
+              {fieldErrors.email && !errors.email && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             {/* Password */}
@@ -167,7 +198,7 @@ const LoginPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   className={`appearance-none block w-full pl-12 pr-12 py-3 border rounded-2xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white/50'
+                    errors.password || fieldErrors.password ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white/50'
                   }`}
                   placeholder="Enter your password"
                 />
@@ -182,13 +213,21 @@ const LoginPage = () => {
                     <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
-                {errors.password && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
-                    <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
+              {/* Show form validation error */}
+              {errors.password && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+                  {errors.password.message}
+                </p>
+              )}
+              {/* Show field-specific error from login attempt */}
+              {fieldErrors.password && !errors.password && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
