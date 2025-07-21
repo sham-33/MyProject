@@ -19,6 +19,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState(userType || 'patient');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
 
   const {
     register,
@@ -35,9 +36,15 @@ const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onSubmit = async (data) => {
-    // Clear previous field errors
+  const onSubmit = async (data, event) => {
+    // Explicitly prevent form submission default behavior
+    if (event) {
+      event.preventDefault();
+    }
+    
+    // Clear previous errors
     setFieldErrors({});
+    setGeneralError('');
     
     try {
       const result = await login(data, selectedUserType);
@@ -47,20 +54,24 @@ const LoginPage = () => {
       } else {
         const errorMessage = result?.message || 'Login failed';
         
-        // Prevent form reset on error by not throwing
-        // Set field-specific errors based on the error message
+        // Handle specific error cases
         if (errorMessage.toLowerCase().includes('password')) {
           setFieldErrors({ password: errorMessage });
         } else if (errorMessage.toLowerCase().includes('email') || errorMessage.toLowerCase().includes('account')) {
           setFieldErrors({ email: errorMessage });
+        } else if (errorMessage.toLowerCase().includes('invalid') || 
+                   errorMessage.toLowerCase().includes('credential') ||
+                   errorMessage === 'Login failed') {
+          // Show general "Invalid email or password" for generic failures
+          setGeneralError('Invalid email or password. Please check your credentials and try again.');
         } else {
-          // Generic error - show under password field as default
-          setFieldErrors({ password: errorMessage });
+          // Show the specific error message in general error area
+          setGeneralError(errorMessage);
         }
       }
     } catch (error) {
       console.error('Login error:', error);
-      setFieldErrors({ password: 'An error occurred during login' });
+      setGeneralError('An error occurred during login. Please try again.');
     }
   };
 
@@ -148,7 +159,16 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <form 
+            className="space-y-6" 
+            onSubmit={handleSubmit(onSubmit)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit(onSubmit)();
+              }
+            }}
+          >
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -245,6 +265,10 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmit(onSubmit)(e);
+                }}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-2xl shadow-sm text-sm font-semibold text-white btn-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
@@ -257,6 +281,24 @@ const LoginPage = () => {
                 )}
               </button>
             </div>
+
+            {/* General Error Display */}
+            {generalError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-red-800">
+                      {generalError}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
 
           {/* Register CTA */}

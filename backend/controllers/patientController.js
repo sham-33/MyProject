@@ -79,7 +79,7 @@ exports.login = async (req, res, next) => {
     if (!patient) {
       return res.status(401).json({
         success: false,
-        message: 'No account found with this email address. Please check your email or register for a new account.'
+        message: 'Invalid email or password'
       });
     }
 
@@ -89,7 +89,7 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Incorrect password. Please check your password and try again.'
+        message: 'Invalid email or password'
       });
     }
 

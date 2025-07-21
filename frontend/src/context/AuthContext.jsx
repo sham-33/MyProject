@@ -1,126 +1,69 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { patientAPI, doctorAPI } from '../services/api';
 import toast from 'react-hot-toast';
-
-// Initial state
-const initialState = {
-  user: null,
-  userType: null,
-  token: null,
-  isAuthenticated: false,
-  loading: true,
-  error: null,
-};
-
-// Action types
-const actionTypes = {
-  SET_LOADING: 'SET_LOADING',
-  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-  LOGOUT: 'LOGOUT',
-  UPDATE_USER: 'UPDATE_USER',
-  SET_ERROR: 'SET_ERROR',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-};
-
-// Reducer function
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case actionTypes.SET_LOADING:
-      return {
-        ...state,
-        loading: action.payload,
-      };
-    case actionTypes.LOGIN_SUCCESS:
-      return {
-        ...state,
-        user: action.payload.user,
-        userType: action.payload.userType,
-        token: action.payload.token,
-        isAuthenticated: true,
-        loading: false,
-        error: null,
-      };
-    case actionTypes.LOGOUT:
-      return {
-        ...state,
-        user: null,
-        userType: null,
-        token: null,
-        isAuthenticated: false,
-        loading: false,
-        error: null,
-      };
-    case actionTypes.UPDATE_USER:
-      return {
-        ...state,
-        user: action.payload,
-      };
-    case actionTypes.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload,
-        loading: false,
-      };
-    case actionTypes.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null,
-      };
-    default:
-      return state;
-  }
-};
+import Cookies from 'js-cookie';
 
 // Create context
 const AuthContext = createContext();
 
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [user, setUser] = useState(null);
+  const [userType, setUserType] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load user from localStorage on app start
+  // Load user from cookies on app start
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem('token');
-      const userType = localStorage.getItem('userType');
-      const user = localStorage.getItem('user');
+      const savedToken = Cookies.get('token');
+      const savedUserType = Cookies.get('userType');
+      const savedUser = Cookies.get('user');
 
-      if (token && userType && user) {
+      if (savedToken && savedUserType && savedUser) {
         try {
+          // Set token for API calls
+          setToken(savedToken);
+          setUserType(savedUserType);
+
           // Verify token is still valid by making a request
           let response;
-          if (userType === 'patient') {
+          if (savedUserType === 'patient') {
             response = await patientAPI.getProfile();
-          } else if (userType === 'doctor') {
+          } else if (savedUserType === 'doctor') {
             response = await doctorAPI.getProfile();
           }
 
           if (response?.data?.success) {
-            dispatch({
-              type: actionTypes.LOGIN_SUCCESS,
-              payload: {
-                user: response.data.data,
-                userType,
-                token,
-              },
-            });
+            setUser(response.data.data);
+            setUserType(savedUserType);
+            setToken(savedToken);
+            setIsAuthenticated(true);
+            setError(null);
           } else {
             // Clear invalid data
-            localStorage.removeItem('token');
-            localStorage.removeItem('userType');
-            localStorage.removeItem('user');
-            dispatch({ type: actionTypes.LOGOUT });
+            Cookies.remove('token');
+            Cookies.remove('userType');
+            Cookies.remove('user');
+            setUser(null);
+            setUserType(null);
+            setToken(null);
+            setIsAuthenticated(false);
           }
         } catch (error) {
           // Clear invalid data
-          localStorage.removeItem('token');
-          localStorage.removeItem('userType');
-          localStorage.removeItem('user');
-          dispatch({ type: actionTypes.LOGOUT });
+          Cookies.remove('token');
+          Cookies.remove('userType');
+          Cookies.remove('user');
+          setUser(null);
+          setUserType(null);
+          setToken(null);
+          setIsAuthenticated(false);
         }
-      } else {
-        dispatch({ type: actionTypes.SET_LOADING, payload: false });
       }
+      setLoading(false);
     };
 
     loadUser();
@@ -129,8 +72,8 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (credentials, userType) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      dispatch({ type: actionTypes.CLEAR_ERROR });
+      setLoading(true);
+      setError(null);
 
       let response;
       if (userType === 'patient') {
@@ -142,44 +85,43 @@ export const AuthProvider = ({ children }) => {
       if (response.data.success) {
         const { user, token, userType: responseUserType } = response.data;
 
-        // Store in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userType', responseUserType);
-        localStorage.setItem('user', JSON.stringify(user));
+        // Store in cookies (expires in 7 days)
+        const cookieOptions = { 
+          expires: 7, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' 
+        };
+        Cookies.set('token', token, cookieOptions);
+        Cookies.set('userType', responseUserType, cookieOptions);
+        Cookies.set('user', JSON.stringify(user), cookieOptions);
 
-        dispatch({
-          type: actionTypes.LOGIN_SUCCESS,
-          payload: {
-            user,
-            userType: responseUserType,
-            token,
-          },
-        });
+        setUser(user);
+        setUserType(responseUserType);
+        setToken(token);
+        setIsAuthenticated(true);
+        setError(null);
 
         toast.success(`Welcome back, ${user.firstName}!`);
         return { success: true };
       } else {
-        // Handle case where response is received but success is false
         const message = response.data?.message || 'Login failed';
-        dispatch({ type: actionTypes.SET_ERROR, payload: message });
-        // Don't show toast here - let component handle the error display
+        setError(message);
         return { success: false, message };
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
-      dispatch({ type: actionTypes.SET_ERROR, payload: message });
-      // Don't show toast here - let component handle the error display
+      setError(message);
       return { success: false, message };
     } finally {
-      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+      setLoading(false);
     }
   };
 
   // Register function
   const register = async (userData, userType) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
-      dispatch({ type: actionTypes.CLEAR_ERROR });
+      setLoading(true);
+      setError(null);
 
       let response;
       if (userType === 'patient') {
@@ -191,48 +133,57 @@ export const AuthProvider = ({ children }) => {
       if (response.data.success) {
         const { user, token, userType: responseUserType } = response.data;
 
-        // Store in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userType', responseUserType);
-        localStorage.setItem('user', JSON.stringify(user));
+        // Store in cookies
+        const cookieOptions = { 
+          expires: 7, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' 
+        };
+        Cookies.set('token', token, cookieOptions);
+        Cookies.set('userType', responseUserType, cookieOptions);
+        Cookies.set('user', JSON.stringify(user), cookieOptions);
 
-        dispatch({
-          type: actionTypes.LOGIN_SUCCESS,
-          payload: {
-            user,
-            userType: responseUserType,
-            token,
-          },
-        });
+        setUser(user);
+        setUserType(responseUserType);
+        setToken(token);
+        setIsAuthenticated(true);
+        setError(null);
 
         toast.success(`Welcome, ${user.firstName}! Registration successful.`);
         return { success: true };
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Registration failed';
-      dispatch({ type: actionTypes.SET_ERROR, payload: message });
+      setError(message);
       toast.error(message);
       return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
   // Logout function
   const logout = async () => {
     try {
-      if (state.userType === 'patient') {
+      if (userType === 'patient') {
         await patientAPI.logout();
-      } else if (state.userType === 'doctor') {
+      } else if (userType === 'doctor') {
         await doctorAPI.logout();
       }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
-      localStorage.removeItem('user');
+      // Clear cookies
+      Cookies.remove('token');
+      Cookies.remove('userType');
+      Cookies.remove('user');
       
-      dispatch({ type: actionTypes.LOGOUT });
+      setUser(null);
+      setUserType(null);
+      setToken(null);
+      setIsAuthenticated(false);
+      setError(null);
+      
       toast.success('Logged out successfully');
     }
   };
@@ -240,23 +191,25 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateProfile = async (userData) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+      setLoading(true);
       
       let response;
-      if (state.userType === 'patient') {
+      if (userType === 'patient') {
         response = await patientAPI.updateProfile(userData);
-      } else if (state.userType === 'doctor') {
+      } else if (userType === 'doctor') {
         response = await doctorAPI.updateProfile(userData);
       }
 
       if (response.data.success) {
         const updatedUser = response.data.data;
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        const cookieOptions = { 
+          expires: 7, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' 
+        };
+        Cookies.set('user', JSON.stringify(updatedUser), cookieOptions);
         
-        dispatch({
-          type: actionTypes.UPDATE_USER,
-          payload: updatedUser,
-        });
+        setUser(updatedUser);
         
         toast.success('Profile updated successfully');
         return { success: true };
@@ -266,19 +219,19 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     } finally {
-      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+      setLoading(false);
     }
   };
 
   // Update password
   const updatePassword = async (passwordData) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+      setLoading(true);
       
       let response;
-      if (state.userType === 'patient') {
+      if (userType === 'patient') {
         response = await patientAPI.updatePassword(passwordData);
-      } else if (state.userType === 'doctor') {
+      } else if (userType === 'doctor') {
         response = await doctorAPI.updatePassword(passwordData);
       }
 
@@ -291,14 +244,14 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     } finally {
-      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+      setLoading(false);
     }
   };
 
   // Forgot password
   const forgotPassword = async (email, userType) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+      setLoading(true);
       
       let response;
       if (userType === 'patient') {
@@ -316,14 +269,14 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, message };
     } finally {
-      dispatch({ type: actionTypes.SET_LOADING, payload: false });
+      setLoading(false);
     }
   };
 
   // Reset password
   const resetPassword = async (token, password, userType) => {
     try {
-      dispatch({ type: actionTypes.SET_LOADING, payload: true });
+      setLoading(true);
       
       let response;
       if (userType === 'patient') {
@@ -335,19 +288,21 @@ export const AuthProvider = ({ children }) => {
       if (response.data.success) {
         const { user, token: newToken, userType: responseUserType } = response.data;
 
-        // Store in localStorage
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('userType', responseUserType);
-        localStorage.setItem('user', JSON.stringify(user));
+        // Store in cookies
+        const cookieOptions = { 
+          expires: 7, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict' 
+        };
+        Cookies.set('token', newToken, cookieOptions);
+        Cookies.set('userType', responseUserType, cookieOptions);
+        Cookies.set('user', JSON.stringify(user), cookieOptions);
 
-        dispatch({
-          type: actionTypes.LOGIN_SUCCESS,
-          payload: {
-            user,
-            userType: responseUserType,
-            token: newToken,
-          },
-        });
+        setUser(user);
+        setUserType(responseUserType);
+        setToken(newToken);
+        setIsAuthenticated(true);
+        setError(null);
 
         toast.success('Password reset successful');
         return { success: true };
@@ -356,11 +311,18 @@ export const AuthProvider = ({ children }) => {
       const message = error.response?.data?.message || 'Password reset failed';
       toast.error(message);
       return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const value = {
-    ...state,
+    user,
+    userType,
+    token,
+    isAuthenticated,
+    loading,
+    error,
     login,
     register,
     logout,
