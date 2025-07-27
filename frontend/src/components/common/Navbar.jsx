@@ -65,18 +65,11 @@ const Navbar = () => {
                 </Link>
                 <div className="flex items-center space-x-2 ml-4">
                   <Link
-                    to="/login/patient"
+                    to="/login"
                     className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-blue-50"
                   >
                     <User className="h-4 w-4" />
-                    <span>Patient Login</span>
-                  </Link>
-                  <Link
-                    to="/login/doctor"
-                    className="flex items-center space-x-2 text-green-600 hover:text-green-700 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-green-50"
-                  >
-                    <Stethoscope className="h-4 w-4" />
-                    <span>Doctor Login</span>
+                    <span>Login</span>
                   </Link>
                   <Link
                     to="/register"
@@ -106,6 +99,26 @@ const Navbar = () => {
                   <Calendar className="h-4 w-4" />
                   <span>Appointments</span>
                 </Link>
+                
+                {userType === 'patient' && (
+                  <Link
+                    to="/consultations"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-blue-50"
+                  >
+                    <Stethoscope className="h-4 w-4" />
+                    <span>Consultations</span>
+                  </Link>
+                )}
+                
+                {userType === 'doctor' && (
+                  <Link
+                    to="/create-consultation"
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:bg-blue-50"
+                  >
+                    <Stethoscope className="h-4 w-4" />
+                    <span>Create Record</span>
+                  </Link>
+                )}
                 
                 <Link
                   to="/messages"
@@ -204,20 +217,12 @@ const Navbar = () => {
                     <span>Find Doctors</span>
                   </Link>
                   <Link
-                    to="/login/patient"
+                    to="/login"
                     className="flex items-center space-x-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-4 py-3 rounded-xl text-base font-medium transition-colors"
                     onClick={toggleMenu}
                   >
                     <User className="h-5 w-5" />
-                    <span>Patient Login</span>
-                  </Link>
-                  <Link
-                    to="/login/doctor"
-                    className="flex items-center space-x-3 text-green-600 hover:text-green-700 hover:bg-green-50 px-4 py-3 rounded-xl text-base font-medium transition-colors"
-                    onClick={toggleMenu}
-                  >
-                    <Stethoscope className="h-5 w-5" />
-                    <span>Doctor Login</span>
+                    <span>Login</span>
                   </Link>
                   <Link
                     to="/register"
@@ -265,6 +270,28 @@ const Navbar = () => {
                     <Calendar className="h-5 w-5" />
                     <span>Appointments</span>
                   </Link>
+                  
+                  {userType === 'patient' && (
+                    <Link
+                      to="/consultations"
+                      className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-3 rounded-xl text-base font-medium transition-colors"
+                      onClick={toggleMenu}
+                    >
+                      <Stethoscope className="h-5 w-5" />
+                      <span>Consultations</span>
+                    </Link>
+                  )}
+                  
+                  {userType === 'doctor' && (
+                    <Link
+                      to="/create-consultation"
+                      className="flex items-center space-x-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-3 rounded-xl text-base font-medium transition-colors"
+                      onClick={toggleMenu}
+                    >
+                      <Stethoscope className="h-5 w-5" />
+                      <span>Create Record</span>
+                    </Link>
+                  )}
                   
                   <Link
                     to="/messages"

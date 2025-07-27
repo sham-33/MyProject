@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const Patient = require('../models/Patient');
+const Consultation = require('../models/Consultation');
 const sendTokenResponse = require('../utils/sendTokenResponse');
 const sendEmail = require('../utils/sendEmail');
 
@@ -110,16 +111,30 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// @desc    Get current logged in patient
+// @desc    Get current logged in patient with latest consultation
 // @route   GET /api/patients/me
 // @access  Private
 exports.getMe = async (req, res, next) => {
   try {
     const patient = await Patient.findById(req.user.id);
 
+    // Get latest consultation for this patient
+    const latestConsultation = await Consultation.findOne({ 
+      patient: req.user.id,
+      isActive: true 
+    })
+      .populate({
+        path: 'doctor',
+        select: 'firstName lastName email specialization'
+      })
+      .sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
-      data: patient
+      data: {
+        ...patient.toJSON(),
+        latestConsultation
+      }
     });
   } catch (error) {
     console.error(error);
@@ -347,4 +362,83 @@ exports.logout = async (req, res, next) => {
     success: true,
     message: 'Patient logged out successfully'
   });
+};
+
+// @desc    Get patient's consultation history
+// @route   GET /api/patients/consultations
+// @access  Private
+exports.getMyConsultations = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const consultations = await Consultation.find({ 
+      patient: req.user.id,
+      isActive: true 
+    })
+      .populate({
+        path: 'doctor',
+        select: 'firstName lastName email specialization'
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Consultation.countDocuments({ 
+      patient: req.user.id,
+      isActive: true 
+    });
+
+    res.status(200).json({
+      success: true,
+      count: consultations.length,
+      total,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      },
+      data: consultations
+    });
+  } catch (error) {
+    console.error('Get patient consultations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error retrieving consultations'
+    });
+  }
+};
+
+// @desc    Get patient's latest consultation
+// @route   GET /api/patients/consultations/latest
+// @access  Private
+exports.getMyLatestConsultation = async (req, res, next) => {
+  try {
+    const consultation = await Consultation.findOne({ 
+      patient: req.user.id,
+      isActive: true 
+    })
+      .populate({
+        path: 'doctor',
+        select: 'firstName lastName email specialization'
+      })
+      .sort({ createdAt: -1 });
+
+    if (!consultation) {
+      return res.status(404).json({
+        success: false,
+        message: 'No consultation found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: consultation
+    });
+  } catch (error) {
+    console.error('Get latest consultation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error retrieving latest consultation'
+    });
+  }
 };

@@ -9,7 +9,9 @@ const {
   resetPassword,
   getDoctors,
   getDoctor,
-  logout
+  logout,
+  getMyConsultations,
+  getPatientWithHistory
 } = require('../controllers/doctorController');
 
 const { protectDoctor } = require('../middleware/auth');
@@ -35,6 +37,8 @@ router.put('/resetpassword/:resettoken', validateResetPassword, resetPassword);
 router.get('/me', protectDoctor, getMe);
 router.put('/updatedetails', protectDoctor, updateDetails);
 router.put('/updatepassword', protectDoctor, validateUpdatePassword, updatePassword);
+router.get('/consultations', protectDoctor, getMyConsultations);
+router.get('/patients/:patientId', protectDoctor, getPatientWithHistory);
 router.get('/logout', protectDoctor, logout);
 
 module.exports = router;

@@ -34,16 +34,13 @@ const doctorSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Please provide phone number'],
     match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
   },
   dateOfBirth: {
-    type: Date,
-    required: [true, 'Please provide date of birth']
+    type: Date
   },
   gender: {
     type: String,
-    required: [true, 'Please provide gender'],
     enum: ['male', 'female', 'other']
   },
   specialization: {
@@ -73,32 +70,22 @@ const doctorSchema = new mongoose.Schema({
   },
   licenseNumber: {
     type: String,
-    required: [true, 'Please provide medical license number'],
     unique: true,
-    trim: true
+    trim: true,
+    sparse: true  // Allow multiple null values
   },
   experience: {
     type: Number,
-    required: [true, 'Please provide years of experience'],
-    min: [0, 'Experience cannot be negative']
+    min: [0, 'Experience cannot be negative'],
+    default: 0
   },
   education: [{
-    degree: {
-      type: String,
-      required: true
-    },
-    institution: {
-      type: String,
-      required: true
-    },
-    year: {
-      type: Number,
-      required: true
-    }
+    degree: String,
+    institution: String,
+    year: Number
   }],
   hospital: {
     type: String,
-    required: [true, 'Please provide hospital/clinic name'],
     trim: true
   },
   hospitalAddress: {
@@ -109,8 +96,8 @@ const doctorSchema = new mongoose.Schema({
   },
   consultationFee: {
     type: Number,
-    required: [true, 'Please provide consultation fee'],
-    min: [0, 'Consultation fee cannot be negative']
+    min: [0, 'Consultation fee cannot be negative'],
+    default: 0
   },
   availability: [{
     day: {

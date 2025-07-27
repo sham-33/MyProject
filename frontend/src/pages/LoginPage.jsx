@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -13,11 +13,10 @@ const schema = yup.object({
 });
 
 const LoginPage = () => {
-  const { userType } = useParams();
   const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedUserType, setSelectedUserType] = useState(userType || 'patient');
+  const [selectedUserType, setSelectedUserType] = useState('patient');
   const [fieldErrors, setFieldErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
 

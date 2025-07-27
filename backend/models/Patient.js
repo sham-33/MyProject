@@ -34,51 +34,28 @@ const patientSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Please provide phone number'],
     match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
   },
   dateOfBirth: {
-    type: Date,
-    required: [true, 'Please provide date of birth']
+    type: Date
   },
   gender: {
     type: String,
-    required: [true, 'Please provide gender'],
     enum: ['male', 'female', 'other']
   },
   address: {
-    street: {
-      type: String,
-      required: [true, 'Please provide street address']
-    },
-    city: {
-      type: String,
-      required: [true, 'Please provide city']
-    },
-    state: {
-      type: String,
-      required: [true, 'Please provide state']
-    },
-    zipCode: {
-      type: String,
-      required: [true, 'Please provide zip code'],
-      match: [/^\d{5,6}$/, 'Please provide a valid zip code']
-    }
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String
   },
   emergencyContact: {
-    name: {
-      type: String,
-      required: [true, 'Please provide emergency contact name']
-    },
+    name: String,
     phone: {
       type: String,
-      required: [true, 'Please provide emergency contact phone'],
       match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
     },
-    relationship: {
-      type: String,
-      required: [true, 'Please provide relationship to emergency contact']
-    }
+    relationship: String
   },
   medicalHistory: [{
     condition: String,

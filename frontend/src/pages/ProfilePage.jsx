@@ -293,6 +293,91 @@ const ProfilePage = () => {
                   </div>
                 )}
 
+                {/* Latest Consultation for Patients */}
+                {userType === 'patient' && user.latestConsultation && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <Stethoscope className="h-5 w-5 mr-2 text-blue-500" />
+                      Latest Consultation
+                    </h3>
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Doctor</p>
+                          <p className="font-medium text-gray-900">
+                            Dr. {user.latestConsultation.doctor.firstName} {user.latestConsultation.doctor.lastName}
+                          </p>
+                          <p className="text-sm text-gray-500">{user.latestConsultation.doctor.specialization}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Date</p>
+                          <p className="font-medium text-gray-900">
+                            {new Date(user.latestConsultation.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Medical Condition</p>
+                          <p className="font-medium text-gray-900">{user.latestConsultation.medicalCondition}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Primary Diagnosis</p>
+                          <p className="font-medium text-gray-900">{user.latestConsultation.diagnosis.primaryDiagnosis}</p>
+                        </div>
+                      </div>
+                      
+                      {user.latestConsultation.medications && user.latestConsultation.medications.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600 mb-2">Current Medications</p>
+                          <div className="space-y-2">
+                            {user.latestConsultation.medications.slice(0, 3).map((medication, index) => (
+                              <div key={index} className="flex justify-between items-center bg-white rounded p-2">
+                                <span className="font-medium text-gray-900">{medication.name}</span>
+                                <span className="text-sm text-gray-600">{medication.dosage} - {medication.frequency}</span>
+                              </div>
+                            ))}
+                            {user.latestConsultation.medications.length > 3 && (
+                              <p className="text-sm text-gray-500">
+                                +{user.latestConsultation.medications.length - 3} more medications
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4 pt-4 border-t border-blue-100">
+                        <a 
+                          href="/consultations" 
+                          className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                        >
+                          View Full Consultation History →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {userType === 'patient' && !user.latestConsultation && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <Stethoscope className="h-5 w-5 mr-2 text-gray-400" />
+                      Consultation History
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <Stethoscope className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-2">No consultation records found</p>
+                      <p className="text-sm text-gray-500">
+                        Your consultation history will appear here after your first visit
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Doctor-specific fields */}
                 {userType === 'doctor' && (
                   <>

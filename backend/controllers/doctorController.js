@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
+const Consultation = require('../models/Consultation');
 const sendTokenResponse = require('../utils/sendTokenResponse');
 const sendEmail = require('../utils/sendEmail');
 
@@ -430,4 +432,107 @@ exports.logout = async (req, res, next) => {
     success: true,
     message: 'Doctor logged out successfully'
   });
+};
+
+// @desc    Get doctor's consultation history
+// @route   GET /api/doctors/consultations
+// @access  Private
+exports.getMyConsultations = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const consultations = await Consultation.find({ 
+      doctor: req.user.id,
+      isActive: true 
+    })
+      .populate({
+        path: 'patient',
+        select: 'firstName lastName email phone'
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Consultation.countDocuments({ 
+      doctor: req.user.id,
+      isActive: true 
+    });
+
+    res.status(200).json({
+      success: true,
+      count: consultations.length,
+      total,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit)
+      },
+      data: consultations
+    });
+  } catch (error) {
+    console.error('Get doctor consultations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error retrieving consultations'
+    });
+  }
+};
+
+// @desc    Get patient details with consultation history (for doctors)
+// @route   GET /api/doctors/patients/:patientId
+// @access  Private
+exports.getPatientWithHistory = async (req, res, next) => {
+  try {
+    const { patientId } = req.params;
+    const { page = 1, limit = 5 } = req.query;
+
+    // Get patient details
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found'
+      });
+    }
+
+    // Get patient's consultation history
+    const consultations = await Consultation.find({ 
+      patient: patientId,
+      isActive: true 
+    })
+      .populate({
+        path: 'doctor',
+        select: 'firstName lastName email specialization'
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const totalConsultations = await Consultation.countDocuments({ 
+      patient: patientId,
+      isActive: true 
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        patient,
+        consultationHistory: {
+          consultations,
+          total: totalConsultations,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            pages: Math.ceil(totalConsultations / limit)
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get patient with history error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error retrieving patient information'
+    });
+  }
 };

@@ -12,6 +12,8 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import MessagesPage from './pages/MessagesPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ConsultationHistoryPage from './pages/ConsultationHistoryPage';
+import CreateConsultationPage from './pages/CreateConsultationPage';
 
 function App() {
   return (
@@ -63,6 +65,24 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MessagesPage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/consultations"
+                element={
+                  <ProtectedRoute requiredUserType="patient">
+                    <ConsultationHistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/create-consultation"
+                element={
+                  <ProtectedRoute requiredUserType="doctor">
+                    <CreateConsultationPage />
                   </ProtectedRoute>
                 }
               />
