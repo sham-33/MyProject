@@ -307,7 +307,7 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 rounded-full">New to HealthCare+?</span>
+                <span className="px-4 bg-white text-gray-500 rounded-full">New to MediLink?</span>
               </div>
             </div>
 

@@ -1,6 +1,6 @@
-# Hospital Management System - Patient-Doctor Appointment Booking
+# MediLink - Patient-Doctor Healthcare Platform
 
-A comprehensive healthcare platform that allows patients to explore doctors, book appointments, and manage communication with healthcare providers.
+A comprehensive healthcare platform that connects patients with doctors, enabling secure consultations, medical record management, and streamlined healthcare communication.
 
 ## Features
 

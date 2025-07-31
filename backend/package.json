@@ -1,14 +1,14 @@
 {
-  "name": "hospital-backend",
+  "name": "medilink-backend",
   "version": "1.0.0",
-  "description": "Hospital management system backend",
+  "description": "MediLink healthcare platform backend",
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["hospital", "mern", "backend"],
+  "keywords": ["medilink", "healthcare", "mern", "backend"],
   "author": "",
   "license": "ISC",
   "dependencies": {

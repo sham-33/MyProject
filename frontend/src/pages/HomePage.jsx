@@ -96,7 +96,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Why Choose <span className="text-gradient">HealthCare+</span>?
+              Why Choose <span className="text-gradient">MediLink</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               We provide a comprehensive healthcare platform that revolutionizes how patients and doctors connect.
@@ -215,7 +215,7 @@ const HomePage = () => {
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <Heart className="h-8 w-8 text-red-500" />
-                <span className="text-2xl font-bold">HealthCare+</span>
+                <span className="text-2xl font-bold">MediLink</span>
               </div>
               <p className="text-gray-400 leading-relaxed">
                 Revolutionizing healthcare with technology. Connect with doctors, manage your health, and get the care you deserve.
@@ -238,17 +238,17 @@ const HomePage = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>support@healthcareplus.com</span>
+                  <span>support@medilink.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MapPin className="h-4 w-4" />
-                  <span>123 Healthcare St, Medical City</span>
+                  <span>123 MediLink Plaza, Health District</span>
                 </div>
               </div>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2025 HealthCare+. All rights reserved. Made with ❤️ for better healthcare.</p>
+            <p>© 2025 MediLink. All rights reserved. Made with ❤️ for better healthcare.</p>
           </div>
         </div>
       </footer>

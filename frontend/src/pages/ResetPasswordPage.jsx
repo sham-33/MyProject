@@ -69,7 +69,7 @@ const ResetPasswordPage = () => {
                 <Heart className="h-8 w-8 text-red-500 animate-float" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="text-2xl font-bold text-gradient">HealthCare+</h1>
+              <h1 className="text-2xl font-bold text-gradient">MediLink</h1>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ const ResetPasswordPage = () => {
                 <Heart className="h-8 w-8 text-red-500 animate-float" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="text-2xl font-bold text-gradient">HealthCare+</h1>
+              <h1 className="text-2xl font-bold text-gradient">MediLink</h1>
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@ const ResetPasswordPage = () => {
               <Heart className="h-8 w-8 text-red-500 animate-float" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
             </div>
-            <h1 className="text-2xl font-bold text-gradient">HealthCare+</h1>
+            <h1 className="text-2xl font-bold text-gradient">MediLink</h1>
           </div>
         </div>
 

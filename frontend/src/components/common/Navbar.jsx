@@ -45,7 +45,7 @@ const Navbar = () => {
               </div>
               <div>
                 <span className="text-2xl font-bold text-gradient">
-                  HealthCare+
+                  MediLink
                 </span>
                 <div className="text-xs text-gray-500 font-medium">Your Health Partner</div>
               </div>
