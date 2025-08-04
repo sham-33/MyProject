@@ -1,346 +1,189 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useAuth } from "../context/AuthContext";
-import { Eye, EyeOff, User, Stethoscope, ArrowLeft } from "lucide-react";
-
-// Simplified Patient validation schema
-const patientSchema = yup.object({
-  firstName: yup.string().required("First name is required").max(50),
-  lastName: yup.string().required("Last name is required").max(50),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Confirm password is required")
-});
-
-// Simplified Doctor validation schema
-const doctorSchema = yup.object({
-  firstName: yup.string().required("First name is required").max(50),
-  lastName: yup.string().required("Last name is required").max(50),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Confirm password is required"),
-  specialization: yup.string().required("Specialization is required")
-});
-
-const specializations = [
-  { value: "cardiology", label: "Cardiology" },
-  { value: "dermatology", label: "Dermatology" },
-  { value: "endocrinology", label: "Endocrinology" },
-  { value: "gastroenterology", label: "Gastroenterology" },
-  { value: "neurology", label: "Neurology" },
-  { value: "oncology", label: "Oncology" },
-  { value: "orthopedics", label: "Orthopedics" },
-  { value: "pediatrics", label: "Pediatrics" },
-  { value: "psychiatry", label: "Psychiatry" },
-  { value: "pulmonology", label: "Pulmonology" },
-  { value: "radiology", label: "Radiology" },
-  { value: "surgery", label: "Surgery" },
-  { value: "urology", label: "Urology" },
-  { value: "general_medicine", label: "General Medicine" },
-  { value: "emergency_medicine", label: "Emergency Medicine" },
-  { value: "anesthesiology", label: "Anesthesiology" },
-  { value: "pathology", label: "Pathology" },
-  { value: "ophthalmology", label: "Ophthalmology" },
-  { value: "otolaryngology", label: "Otolaryngology" }
-];
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Heart, User, Stethoscope } from 'lucide-react';
 
 const RegisterPage = () => {
+  const { register } = useAuth();
   const navigate = useNavigate();
-  const { userType: urlUserType } = useParams();
-  const { register: registerUser, loading } = useAuth();
-  const [selectedUserType, setSelectedUserType] = useState(urlUserType || "patient");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const schema = selectedUserType === "patient" ? patientSchema : doctorSchema;
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm({
-    resolver: yupResolver(schema)
+  const [userType, setUserType] = useState('patient');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    specialization: ''
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (urlUserType && ["patient", "doctor"].includes(urlUserType)) {
-      setSelectedUserType(urlUserType);
-    }
-  }, [urlUserType]);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  useEffect(() => {
-    reset();
-  }, [selectedUserType, reset]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  const onSubmit = async (data) => {
-    const { confirmPassword, ...userData } = data;
-    
     try {
-      await registerUser(userData, selectedUserType);
-      navigate("/");
+      const userData = { ...formData, userType };
+      await register(userData);
+      navigate('/profile');
     } catch (error) {
-      console.error("Registration error:", error);
+      setError(error.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link
-          to="/"
-          className="flex items-center justify-center text-blue-600 hover:text-blue-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Link>
-        
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our healthcare platform today
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-xl p-8 w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Heart className="h-12 w-12 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Join MediLink</h1>
         </div>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
-          {/* User Type Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              I want to register as:
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedUserType("patient")}
-                className={`flex items-center justify-center px-4 py-3 text-sm font-medium rounded-l-md border-t border-l border-b ${
-                  selectedUserType === "patient"
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <User className="h-5 w-5 mr-2" />
-                Patient
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedUserType("doctor")}
-                className={`flex items-center justify-center px-4 py-3 text-sm font-medium rounded-r-md border-t border-r border-b ${
-                  selectedUserType === "doctor"
-                    ? "bg-green-600 text-white border-green-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Stethoscope className="h-5 w-5 mr-2" />
-                Doctor
-              </button>
+        {/* User Type Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            I am a:
+          </label>
+          <div className="flex rounded-lg overflow-hidden border">
+            <button
+              type="button"
+              onClick={() => setUserType('patient')}
+              className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium ${
+                userType === 'patient'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <User className="h-4 w-4 mr-2" />
+              Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => setUserType('doctor')}
+              className={`flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium ${
+                userType === 'doctor'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Stethoscope className="h-4 w-4 mr-2" />
+              Doctor
+            </button>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {/* Register Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                First Name
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Last Name
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {/* Basic Information */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  {...register("firstName")}
-                  type="text"
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-                    errors.firstName ? "border-red-300" : "border-gray-300"
-                  }`}
-                />
-                {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.firstName.message}
-                  </p>
-                )}
-              </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  {...register("lastName")}
-                  type="text"
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-                    errors.lastName ? "border-red-300" : "border-gray-300"
-                  }`}
-                />
-                {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.lastName.message}
-                  </p>
-                )}
-              </div>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
+          {/* Specialization field for doctors only */}
+          {userType === 'doctor' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email Address <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Specialization
               </label>
               <input
-                {...register("email")}
-                type="email"
-                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-                  errors.email ? "border-red-300" : "border-gray-300"
-                }`}
+                type="text"
+                name="specialization"
+                value={formData.specialization}
+                onChange={handleChange}
+                required
+                placeholder="e.g., Cardiologist, Dentist, etc."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.email.message}
-                </p>
-              )}
             </div>
+          )}
 
-            {/* Specialization for doctors */}
-            {selectedUserType === "doctor" && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Specialization <span className="text-red-500">*</span>
-                </label>
-                <select
-                  {...register("specialization")}
-                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-                    errors.specialization ? "border-red-300" : "border-gray-300"
-                  }`}
-                >
-                  <option value="">Select your specialization</option>
-                  {specializations.map((spec) => (
-                    <option key={spec.value} value={spec.value}>
-                      {spec.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.specialization && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.specialization.message}
-                  </p>
-                )}
-              </div>
-            )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
 
-            {/* Password Section */}
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <div className="mt-1 relative">
-                  <input
-                    {...register("password")}
-                    type={showPassword ? "text" : "password"}
-                    className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10 ${
-                      errors.password ? "border-red-300" : "border-gray-300"
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Confirm Password <span className="text-red-500">*</span>
-                </label>
-                <div className="mt-1 relative">
-                  <input
-                    {...register("confirmPassword")}
-                    type={showConfirmPassword ? "text" : "password"}
-                    className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10 ${
-                      errors.confirmPassword ? "border-red-300" : "border-gray-300"
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Information Note */}
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    <strong>Note:</strong> You can complete additional profile information after registration. 
-                    Only basic details are required to get started.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  selectedUserType === "patient"
-                    ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-                    : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-                } ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                } transition-colors`}
-              >
-                {loading ? "Creating Account..." : `Register as ${selectedUserType === "patient" ? "Patient" : "Doctor"}`}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <span className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </span>
-            </div>
-          </form>
-        </div>
+        {/* Login Link */}
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Already have an account?{' '}
+          <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );

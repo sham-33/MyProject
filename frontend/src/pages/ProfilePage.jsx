@@ -1,81 +1,69 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, Stethoscope, Edit, Save, X, Heart, Phone, Mail, MapPin, Calendar, Award } from 'lucide-react';
+import { User, Mail, Stethoscope, Calendar, FileText, Edit2, Save, X } from 'lucide-react';
 
 const ProfilePage = () => {
-  const { user, userType, updateProfile, updatePassword, loading } = useAuth();
+  const { user, userType, updateProfile, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    specialization: '',
+    consultationNote: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) {
-      setFormData({ ...user });
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        specialization: user.specialization || '',
+        consultationNote: user.consultationNote || ''
+      });
     }
   }, [user]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSaveProfile = async () => {
-    const result = await updateProfile(formData);
-    if (result.success) {
-      setIsEditing(false);
-    }
-  };
-
-  const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-    
-    const result = await updatePassword({
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
     });
-    
-    if (result.success) {
-      setIsChangingPassword(false);
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      await updateProfile(formData);
+      setIsEditing(false);
+    } catch (error) {
+      setError(error.message || 'Update failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        specialization: user.specialization || '',
+        consultationNote: user.consultationNote || ''
       });
     }
+    setIsEditing(false);
+    setError('');
   };
 
-  if (loading) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -83,488 +71,226 @@ const ProfilePage = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile not found</h2>
-          <p className="text-gray-600">Please log in to view your profile.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className={`p-3 rounded-full ${userType === 'patient' ? 'bg-blue-100' : 'bg-green-100'}`}>
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 {userType === 'patient' ? (
-                  <User className={`h-8 w-8 ${userType === 'patient' ? 'text-blue-600' : 'text-green-600'}`} />
+                  <User className="h-8 w-8 text-white" />
                 ) : (
-                  <Stethoscope className={`h-8 w-8 ${userType === 'patient' ? 'text-blue-600' : 'text-green-600'}`} />
+                  <Stethoscope className="h-8 w-8 text-white" />
                 )}
               </div>
-              <div>
+              <div className="ml-4">
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {userType === 'patient' ? 'Patient' : 'Doctor'} Profile
                 </h1>
-                <div className="flex items-center space-x-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    userType === 'patient' 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {userType === 'patient' ? 'Patient' : 'Doctor'}
-                  </span>
-                  {userType === 'doctor' && user.specialization && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {user.specialization.charAt(0).toUpperCase() + user.specialization.slice(1).replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
+                <p className="text-gray-600">
+                  {user.firstName} {user.lastName}
+                </p>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-3">
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <Edit className="h-4 w-4 mr-2" />
+                  <Edit2 className="h-4 w-4 mr-2" />
                   Edit Profile
                 </button>
               ) : (
-                <div className="flex space-x-2">
+                <>
                   <button
-                    onClick={handleSaveProfile}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-                  >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setFormData({ ...user });
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    onClick={handleCancel}
+                    className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
                   </button>
-                </div>
+                </>
               )}
+              <button
+                onClick={logout}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Profile Information */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                {isEditing ? 'Edit Profile Information' : 'Profile Information'}
-              </h2>
-              
-              <div className="space-y-4">
-                {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName || ''}
-                        onChange={handleInputChange}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    ) : (
-                      <p className="text-gray-900">{user.firstName}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName || ''}
-                        onChange={handleInputChange}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    ) : (
-                      <p className="text-gray-900">{user.lastName}</p>
-                    )}
-                  </div>
+        {/* Profile Information */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold mb-6">Profile Information</h2>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <p className="text-gray-900 flex items-center">
-                      <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                      {user.email}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    {isEditing ? (
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone || ''}
-                        onChange={handleInputChange}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    ) : (
-                      <p className="text-gray-900 flex items-center">
-                        <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                        {user.phone}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                    <p className="text-gray-900 flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                      {new Date(user.dateOfBirth).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                    <p className="text-gray-900 capitalize">{user.gender}</p>
-                  </div>
-                </div>
-
-                {/* Patient-specific fields */}
-                {userType === 'patient' && user.address && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    {isEditing ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                          <input
-                            type="text"
-                            name="address.street"
-                            placeholder="Street Address"
-                            value={formData.address?.street || ''}
-                            onChange={handleInputChange}
-                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </div>
-                        <input
-                          type="text"
-                          name="address.city"
-                          placeholder="City"
-                          value={formData.address?.city || ''}
-                          onChange={handleInputChange}
-                          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <input
-                          type="text"
-                          name="address.state"
-                          placeholder="State"
-                          value={formData.address?.state || ''}
-                          onChange={handleInputChange}
-                          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <input
-                          type="text"
-                          name="address.zipCode"
-                          placeholder="Zip Code"
-                          value={formData.address?.zipCode || ''}
-                          onChange={handleInputChange}
-                          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    ) : (
-                      <p className="text-gray-900 flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                        {user.address.street}, {user.address.city}, {user.address.state} {user.address.zipCode}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Latest Consultation for Patients */}
-                {userType === 'patient' && user.latestConsultation && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Stethoscope className="h-5 w-5 mr-2 text-blue-500" />
-                      Latest Consultation
-                    </h3>
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Doctor</p>
-                          <p className="font-medium text-gray-900">
-                            Dr. {user.latestConsultation.doctor.firstName} {user.latestConsultation.doctor.lastName}
-                          </p>
-                          <p className="text-sm text-gray-500">{user.latestConsultation.doctor.specialization}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Date</p>
-                          <p className="font-medium text-gray-900">
-                            {new Date(user.latestConsultation.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Medical Condition</p>
-                          <p className="font-medium text-gray-900">{user.latestConsultation.medicalCondition}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Primary Diagnosis</p>
-                          <p className="font-medium text-gray-900">{user.latestConsultation.diagnosis.primaryDiagnosis}</p>
-                        </div>
-                      </div>
-                      
-                      {user.latestConsultation.medications && user.latestConsultation.medications.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-sm text-gray-600 mb-2">Current Medications</p>
-                          <div className="space-y-2">
-                            {user.latestConsultation.medications.slice(0, 3).map((medication, index) => (
-                              <div key={index} className="flex justify-between items-center bg-white rounded p-2">
-                                <span className="font-medium text-gray-900">{medication.name}</span>
-                                <span className="text-sm text-gray-600">{medication.dosage} - {medication.frequency}</span>
-                              </div>
-                            ))}
-                            {user.latestConsultation.medications.length > 3 && (
-                              <p className="text-sm text-gray-500">
-                                +{user.latestConsultation.medications.length - 3} more medications
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 pt-4 border-t border-blue-100">
-                        <a 
-                          href="/consultations" 
-                          className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
-                        >
-                          View Full Consultation History →
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {userType === 'patient' && !user.latestConsultation && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Stethoscope className="h-5 w-5 mr-2 text-gray-400" />
-                      Consultation History
-                    </h3>
-                    <div className="bg-gray-50 rounded-lg p-6 text-center">
-                      <Stethoscope className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">No consultation records found</p>
-                      <p className="text-sm text-gray-500">
-                        Your consultation history will appear here after your first visit
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Doctor-specific fields */}
-                {userType === 'doctor' && (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">License Number</label>
-                        <p className="text-gray-900">{user.licenseNumber}</p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
-                        <p className="text-gray-900 flex items-center">
-                          <Award className="h-4 w-4 mr-2 text-gray-400" />
-                          {user.experience} years
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Consultation Fee</label>
-                        <p className="text-gray-900">${user.consultationFee}</p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Hospital/Clinic</label>
-                        <p className="text-gray-900">{user.hospital}</p>
-                      </div>
-                    </div>
-
-                    {user.biography && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Biography</label>
-                        {isEditing ? (
-                          <textarea
-                            name="biography"
-                            value={formData.biography || ''}
-                            onChange={handleInputChange}
-                            rows={4}
-                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        ) : (
-                          <p className="text-gray-900">{user.biography}</p>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+              {error}
             </div>
-          </div>
+          )}
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Info</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Account Type</span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    userType === 'patient' 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {userType}
-                  </span>
+          {isEditing ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Member Since</span>
-                  <span className="text-sm text-gray-900">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-                {userType === 'doctor' && user.isVerified !== undefined && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Verification Status</span>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.isVerified 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {user.isVerified ? 'Verified' : 'Pending'}
-                    </span>
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Password Change */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
-              {!isChangingPassword ? (
-                <button
-                  onClick={() => setIsChangingPassword(true)}
-                  className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Change Password
-                </button>
-              ) : (
-                <form onSubmit={handlePasswordUpdate} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      required
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      required
-                      minLength={6}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      required
-                      minLength={6}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    />
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <button
-                      type="submit"
-                      className="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                    >
-                      Update
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsChangingPassword(false);
-                        setPasswordData({
-                          currentPassword: '',
-                          newPassword: '',
-                          confirmPassword: ''
-                        });
-                      }}
-                      className="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {userType === 'doctor' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Specialization
+                  </label>
+                  <input
+                    type="text"
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               )}
-            </div>
 
-            {/* Patient Emergency Contact */}
-            {userType === 'patient' && user.emergencyContact && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <span className="font-medium">Name:</span> {user.emergencyContact.name}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Phone:</span> {user.emergencyContact.phone}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Relationship:</span> {user.emergencyContact.relationship}
+              {userType === 'patient' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Consultation Notes
+                  </label>
+                  <textarea
+                    name="consultationNote"
+                    value={formData.consultationNote}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Notes from your doctor consultations..."
+                  />
+                </div>
+              )}
+
+              <div className="flex space-x-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    First Name
+                  </label>
+                  <p className="text-gray-900 font-medium">{user.firstName}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Last Name
+                  </label>
+                  <p className="text-gray-900 font-medium">{user.lastName}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">
+                  Email
+                </label>
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                  <p className="text-gray-900 font-medium">{user.email}</p>
+                </div>
+              </div>
+
+              {userType === 'doctor' && user.specialization && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Specialization
+                  </label>
+                  <div className="flex items-center">
+                    <Stethoscope className="h-4 w-4 text-gray-400 mr-2" />
+                    <p className="text-gray-900 font-medium">{user.specialization}</p>
+                  </div>
+                </div>
+              )}
+
+              {userType === 'patient' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 mb-1">
+                    Consultation Notes
+                  </label>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-start">
+                      <FileText className="h-4 w-4 text-gray-400 mr-2 mt-1" />
+                      <p className="text-gray-900">
+                        {user.consultationNote || 'No consultation notes available.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">
+                  Member Since
+                </label>
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                  <p className="text-gray-900 font-medium">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                   </p>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,40 +1,15 @@
 const express = require('express');
-const {
-  register,
-  login,
-  getMe,
-  updateDetails,
-  updatePassword,
-  forgotPassword,
-  resetPassword,
-  logout,
-  getMyConsultations,
-  getMyLatestConsultation
-} = require('../controllers/patientController');
-
-const { protectPatient } = require('../middleware/auth');
-const {
-  validatePatientRegistration,
-  validateLogin,
-  validateForgotPassword,
-  validateResetPassword,
-  validateUpdatePassword
-} = require('../middleware/validation');
-
 const router = express.Router();
+const { registerPatient, loginPatient, getPatientProfile } = require('../controllers/patientController');
+const { protect } = require('../middleware/auth');
 
-// Public routes
-router.post('/register', validatePatientRegistration, register);
-router.post('/login', validateLogin, login);
-router.post('/forgotpassword', validateForgotPassword, forgotPassword);
-router.put('/resetpassword/:resettoken', validateResetPassword, resetPassword);
+// Register patient
+router.post('/register', registerPatient);
 
-// Protected routes
-router.get('/me', protectPatient, getMe);
-router.put('/updatedetails', protectPatient, updateDetails);
-router.put('/updatepassword', protectPatient, validateUpdatePassword, updatePassword);
-router.get('/consultations', protectPatient, getMyConsultations);
-router.get('/consultations/latest', protectPatient, getMyLatestConsultation);
-router.get('/logout', protectPatient, logout);
+// Login patient
+router.post('/login', loginPatient);
+
+// Get patient profile (protected route)
+router.get('/profile', protect, getPatientProfile);
 
 module.exports = router;

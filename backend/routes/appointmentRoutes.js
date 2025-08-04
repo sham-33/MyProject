@@ -1,36 +1,27 @@
 const express = require('express');
-const {
-  createAppointment,
-  getPatientAppointments,
-  getDoctorAppointments,
-  updateAppointmentStatus,
-  cancelAppointment,
-  getAppointment,
-  getDoctorAvailability
-} = require('../controllers/appointmentController');
-
-const { protectPatient, protectDoctor, protect } = require('../middleware/auth');
-const {
-  validateAppointmentCreation,
-  validateAppointmentStatusUpdate,
-  validateAppointmentCancellation
-} = require('../middleware/validation');
-
 const router = express.Router();
+const { 
+  bookAppointment, 
+  getAllDoctors, 
+  getPatientAppointments, 
+  getDoctorAppointments, 
+  updateAppointmentStatus 
+} = require('../controllers/appointmentController');
+const { protect } = require('../middleware/auth');
 
-// Public routes
-router.get('/doctor/:doctorId/availability', getDoctorAvailability);
+// Book appointment (protected route - patient only)
+router.post('/book', protect, bookAppointment);
 
-// Protected routes - Patient
-router.post('/', protectPatient, validateAppointmentCreation, createAppointment);
-router.get('/patient', protectPatient, getPatientAppointments);
+// Get all doctors
+router.get('/doctors', getAllDoctors);
 
-// Protected routes - Doctor
-router.get('/doctor', protectDoctor, getDoctorAppointments);
-router.put('/:id/status', protectDoctor, validateAppointmentStatusUpdate, updateAppointmentStatus);
+// Get patient's appointments (protected route)
+router.get('/patient', protect, getPatientAppointments);
 
-// Protected routes - Both Patient and Doctor
-router.get('/:id', protect, getAppointment);
-router.put('/:id/cancel', protect, validateAppointmentCancellation, cancelAppointment);
+// Get doctor's appointments (protected route)
+router.get('/doctor', protect, getDoctorAppointments);
+
+// Update appointment status (protected route - doctor only)
+router.put('/:appointmentId/status', protect, updateAppointmentStatus);
 
 module.exports = router;
