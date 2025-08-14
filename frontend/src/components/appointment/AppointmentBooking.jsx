@@ -89,16 +89,13 @@ const AppointmentBooking = ({ doctor, isOpen, onClose, onSuccess }) => {
       setLoading(true);
       
       const appointmentData = {
-        doctor: doctor._id,
-        appointmentDate: data.appointmentDate,
-        appointmentTime: data.appointmentTime,
-        reason: data.reason,
-        symptoms: data.symptoms || '',
-        duration: data.duration,
-        isUrgent: data.isUrgent
+        doctorId: doctor._id,
+        date: data.appointmentDate,
+        time: data.appointmentTime,
+        reason: data.reason
       };
 
-      const response = await api.post('/appointments', appointmentData);
+      const response = await api.post('/appointments/book', appointmentData);
       
       if (response.data.success) {
         toast.success('Appointment request sent successfully!');

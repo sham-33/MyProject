@@ -5,7 +5,8 @@ const {
   getAllDoctors, 
   getPatientAppointments, 
   getDoctorAppointments, 
-  updateAppointmentStatus 
+  updateAppointmentStatus,
+  addReasonToAppointment 
 } = require('../controllers/appointmentController');
 const { protect } = require('../middleware/auth');
 
@@ -23,5 +24,8 @@ router.get('/doctor', protect, getDoctorAppointments);
 
 // Update appointment status (protected route - doctor only)
 router.put('/:appointmentId/status', protect, updateAppointmentStatus);
+
+// Add new reason to appointment (protected route - patient only)
+router.put('/:appointmentId/reason', protect, addReasonToAppointment);
 
 module.exports = router;

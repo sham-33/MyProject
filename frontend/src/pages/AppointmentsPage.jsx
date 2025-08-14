@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, User, Stethoscope, Plus } from 'lucide-react';
+import { Calendar, Clock, User, Stethoscope, Plus, MessageCircle } from 'lucide-react';
+import AddReasonModal from '../components/appointment/AddReasonModal';
 
 const AppointmentsPage = () => {
   const { userType } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAddReasonModal, setShowAddReasonModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [formData, setFormData] = useState({
     doctorId: '',
     date: '',
@@ -62,7 +65,12 @@ const AppointmentsPage = () => {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify(formData)
+                                body: JSON.stringify({
+                          doctorId: formData.doctorId,
+                          date: formData.date,
+                          time: formData.time,
+                          reason: formData.reason
+                        })
       });
 
       const data = await response.json();
@@ -109,6 +117,17 @@ const AppointmentsPage = () => {
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleAddReason = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowAddReasonModal(true);
+  };
+
+  const handleAddReasonSuccess = () => {
+    fetchAppointments();
+    setShowAddReasonModal(false);
+    setSelectedAppointment(null);
   };
 
   return (
@@ -265,9 +284,39 @@ const AppointmentsPage = () => {
                         </p>
                       )}
                       
-                      <p className="text-gray-700 text-sm mb-2">
-                        <strong>Reason:</strong> {appointment.reason}
-                      </p>
+                      {/* Current and Previous Reasons */}
+                      <div className="text-gray-700 text-sm mb-2">
+                        {(() => {
+                          // Handle different data structures
+                          let currentReason = '';
+                          let previousReasons = [];
+                          
+                          if (appointment.reasons && appointment.reasons.length > 0) {
+                            // New structure with reasons array - latest is current, rest are previous
+                            currentReason = appointment.reasons[appointment.reasons.length - 1].text;
+                            previousReasons = appointment.reasons.slice(0, -1).map(r => r.text);
+                          } else if (appointment.currentReason && appointment.previousConsultations) {
+                            // From backend formatted response
+                            currentReason = appointment.currentReason.text;
+                            previousReasons = appointment.previousConsultations.map(r => r.text);
+                          } else if (appointment.reason) {
+                            // Legacy structure with single reason
+                            currentReason = appointment.reason;
+                          }
+                          
+                          return (
+                            <div>
+                              <div><strong>Reason:</strong> {currentReason || 'No reason provided'}</div>
+                              {previousReasons.length > 0 && (
+                                <div className="mt-1">
+                                  <strong>Previous Reasons:</strong> {previousReasons.join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+
                       
                       <div className="flex items-center text-gray-600 text-sm">
                         <Calendar className="h-4 w-4 mr-1" />
@@ -294,6 +343,19 @@ const AppointmentsPage = () => {
                         </button>
                       </div>
                     )}
+
+                    {/* Patient Actions */}
+                    {userType === 'patient' && appointment.status === 'scheduled' && (
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleAddReason(appointment)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors flex items-center"
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Add Reason
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -301,6 +363,17 @@ const AppointmentsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Add Reason Modal */}
+      <AddReasonModal
+        appointment={selectedAppointment}
+        isOpen={showAddReasonModal}
+        onClose={() => {
+          setShowAddReasonModal(false);
+          setSelectedAppointment(null);
+        }}
+        onSuccess={handleAddReasonSuccess}
+      />
     </div>
   );
 };
