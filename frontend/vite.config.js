@@ -9,9 +9,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:3333',
+        target: process.env.VITE_APP_BACKEND_URL || 'http://localhost:3333',
         changeOrigin: true,
-        secure: false,
+        secure: true,  // Set to true for HTTPS backends
       }
     }
   }
