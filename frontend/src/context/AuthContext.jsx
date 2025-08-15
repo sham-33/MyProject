@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       // Try to get patient profile to check if logged in
-      const response = await fetch('/api/patients/profile', {
+      const response = await fetch('https://myproject-7fc9.onrender.com/api/patients/profile', {
         credentials: 'include'
       });
       
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Try doctor profile
-      const doctorResponse = await fetch('/api/doctors/profile', {
+      const doctorResponse = await fetch('https://myproject-7fc9.onrender.com/api/doctors/profile', {
         credentials: 'include'
       });
       
@@ -73,8 +73,8 @@ export const AuthProvider = ({ children }) => {
       const { email, password, userType: loginUserType } = credentials;
       
       const endpoint = loginUserType === 'patient' 
-        ? '/api/patients/login' 
-        : '/api/doctors/login';
+        ? 'https://myproject-7fc9.onrender.com/api/patients/login' 
+        : 'https://myproject-7fc9.onrender.com/api/doctors/login';
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -109,8 +109,8 @@ export const AuthProvider = ({ children }) => {
       const { userType: registerUserType, ...rest } = userData;
       
       const endpoint = registerUserType === 'patient' 
-        ? '/api/patients/register' 
-        : '/api/doctors/register';
+        ? 'https://myproject-7fc9.onrender.com/api/patients/register' 
+        : 'https://myproject-7fc9.onrender.com/api/doctors/register';
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -142,7 +142,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('/api/logout', {
+      await fetch('https://myproject-7fc9.onrender.com/api/logout', {
         method: 'POST',
         credentials: 'include'
       });

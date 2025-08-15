@@ -21,9 +21,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-app.use('/', (req, res) => {
-  res.send('Hi there!')
-})
 // Routes
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
