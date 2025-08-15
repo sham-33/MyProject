@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://myproject-beige-ten.vercel.app/',
+  origin: 'https://myproject-beige-ten.vercel.app',
   credentials: true
 }));
 
