@@ -24,91 +24,102 @@ const AppointmentsPage = () => {
       fetchDoctors();
     }
   }, [userType]);
+  const BASE_URL = 'https://myproject-7fc9.onrender.com/api/appointments';
+  // const BASE_URL = 'http://localhost:3333/api/appointments';
 
-  const fetchAppointments = async () => {
-    try {
-      const endpoint = userType === 'patient' ? 'https://myproject-7fc9.onrender.com/api/appointments/patient' : 'https://myproject-7fc9.onrender.com/api/appointments/doctor';
-      const response = await fetch(endpoint, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (data.success) {
-        setAppointments(data.appointments);
-      }
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    }
-  };
 
-  const fetchDoctors = async () => {
-    try {
-      const response = await fetch('https://myproject-7fc9.onrender.com/api/appointments/doctors', {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (data.success) {
-        setDoctors(data.doctors);
-      }
-    } catch (error) {
-      console.error('Error fetching doctors:', error);
-    }
-  };
+ const fetchAppointments = async () => {
+  try {
+    const endpoint = userType === 'patient' 
+      ? `${BASE_URL}/patient` 
+      : `${BASE_URL}/doctor`;
 
-  const handleCreateAppointment = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const response = await fetch('https://myproject-7fc9.onrender.com/api/appointments/book', {
-        method: 'POST',
+    const response = await fetch(endpoint, {
         headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-                                body: JSON.stringify({
-                          doctorId: formData.doctorId,
-                          date: formData.date,
-                          time: formData.time,
-                          reason: formData.reason
-                        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        alert('Appointment created successfully!');
-        setShowCreateForm(false);
-        setFormData({ doctorId: '', date: '', time: '', reason: '' });
-        fetchAppointments();
-      } else {
-        alert(data.message || 'Failed to create appointment');
-      }
-    } catch (error) {
-      console.error('Error creating appointment:', error);
-      alert('Failed to create appointment');
-    } finally {
-      setLoading(false);
+    "Content-Type": "application/json"
+  },
+      credentials: 'include'
+    });
+    const data = await response.json();
+    if (data.success) {
+      setAppointments(data.appointments);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+  }
+};
 
-  const updateAppointmentStatus = async (appointmentId, status) => {
-    try {
-      const response = await fetch(`https://myproject-7fc9.onrender.com/api/appointments/${appointmentId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ status })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        fetchAppointments();
-      }
-    } catch (error) {
-      console.error('Error updating appointment:', error);
+const fetchDoctors = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/doctors`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    if (data.success) {
+      setDoctors(data.doctors);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+  }
+};
+
+
+
+const handleCreateAppointment = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const response = await fetch(`${BASE_URL}/book`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        doctorId: formData.doctorId,
+        date: formData.date,
+        time: formData.time,
+        reason: formData.reason
+      })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('Appointment created successfully!');
+      setShowCreateForm(false);
+      setFormData({ doctorId: '', date: '', time: '', reason: '' });
+      fetchAppointments();
+    } else {
+      alert(data.message || 'Failed to create appointment');
+    }
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    alert('Failed to create appointment');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const updateAppointmentStatus = async (appointmentId, status) => {
+  try {
+    const response = await fetch(`${BASE_URL}/${appointmentId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ status })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      fetchAppointments();
+    }
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+  }
+};
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -163,7 +174,7 @@ const AppointmentsPage = () => {
                 </label>
                 <select
                   value={formData.doctorId}
-                  onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -184,7 +195,7 @@ const AppointmentsPage = () => {
                   <input
                     type="date"
                     value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
                     min={new Date().toISOString().split('T')[0]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -196,7 +207,7 @@ const AppointmentsPage = () => {
                   </label>
                   <select
                     value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -217,7 +228,7 @@ const AppointmentsPage = () => {
                 </label>
                 <textarea
                   value={formData.reason}
-                  onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                   required
                   placeholder="Please describe the reason for your visit..."
                   rows={3}
@@ -267,7 +278,7 @@ const AppointmentsPage = () => {
                             <User className="h-5 w-5 text-blue-600 mr-2" />
                           )}
                           <span className="font-semibold">
-                            {userType === 'patient' 
+                            {userType === 'patient'
                               ? `Dr. ${appointment.doctor.firstName} ${appointment.doctor.lastName}`
                               : `${appointment.patient.firstName} ${appointment.patient.lastName}`
                             }
@@ -277,20 +288,20 @@ const AppointmentsPage = () => {
                           {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                         </span>
                       </div>
-                      
+
                       {userType === 'patient' && (
                         <p className="text-gray-600 text-sm mb-2">
                           Specialization: {appointment.doctor.specialization}
                         </p>
                       )}
-                      
+
                       {/* Current and Previous Reasons */}
                       <div className="text-gray-700 text-sm mb-2">
                         {(() => {
                           // Handle different data structures
                           let currentReason = '';
                           let previousReasons = [];
-                          
+
                           if (appointment.reasons && appointment.reasons.length > 0) {
                             // New structure with reasons array - latest is current, rest are previous
                             currentReason = appointment.reasons[appointment.reasons.length - 1].text;
@@ -303,7 +314,7 @@ const AppointmentsPage = () => {
                             // Legacy structure with single reason
                             currentReason = appointment.reason;
                           }
-                          
+
                           return (
                             <div>
                               <div><strong>Reason:</strong> {currentReason || 'No reason provided'}</div>
@@ -317,7 +328,7 @@ const AppointmentsPage = () => {
                         })()}
                       </div>
 
-                      
+
                       <div className="flex items-center text-gray-600 text-sm">
                         <Calendar className="h-4 w-4 mr-1" />
                         {new Date(appointment.date).toLocaleDateString()}
