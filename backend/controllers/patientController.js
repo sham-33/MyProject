@@ -32,6 +32,7 @@ const registerPatient = async (req, res) => {
 
     // Set cookie
     res.cookie('token', token, {
+      sameSite: 'none',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
@@ -76,7 +77,8 @@ const loginPatient = async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days,
+      sameSite: 'none'
     });
 
     res.json({
