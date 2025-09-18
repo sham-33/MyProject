@@ -32,9 +32,9 @@ const registerPatient = async (req, res) => {
 
     // Set cookie
     res.cookie('token', token, {
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production" ? true : false, // false in local
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
 
@@ -76,9 +76,11 @@ const loginPatient = async (req, res) => {
     // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production" ? true : false, // false in local
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days,
-      sameSite: 'none'
+
+
     });
 
     res.json({
