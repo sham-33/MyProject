@@ -27,7 +27,7 @@ const AppointmentsPage = () => {
 
   const fetchAppointments = async () => {
     try {
-      const endpoint = userType === 'patient' ? '/api/appointments/patient' : '/api/appointments/doctor';
+      const endpoint = userType === 'patient' ? 'https://myproject-7fc9.onrender.com/api/appointments/patient' : 'https://myproject-7fc9.onrender.com/api/appointments/doctor';
       const response = await fetch(endpoint, {
         credentials: 'include'
       });
@@ -42,7 +42,7 @@ const AppointmentsPage = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await fetch('/api/appointments/doctors', {
+      const response = await fetch('https://myproject-7fc9.onrender.com/api/appointments/doctors', {
         credentials: 'include'
       });
       const data = await response.json();
@@ -59,7 +59,7 @@ const AppointmentsPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/appointments/book', {
+      const response = await fetch('https://myproject-7fc9.onrender.com/api/appointments/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -92,7 +92,7 @@ const AppointmentsPage = () => {
 
   const updateAppointmentStatus = async (appointmentId, status) => {
     try {
-      const response = await fetch(`/api/appointments/${appointmentId}/status`, {
+      const response = await fetch(`https://myproject-7fc9.onrender.com/api/appointments/${appointmentId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
