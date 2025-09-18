@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 
 const AuthContext = createContext();
 const baseurl = "https://myproject-7fc9.onrender.com";
+// const baseurl = "http://localhost:3333";
 //const metaUrl = import.meta.env.VITE_META_URL;
 
 export const useAuth = () => {
